@@ -1,4 +1,4 @@
-# Wunsch-Duell PWA – Quellcode & Handy-Anleitung
+# Rot gegen Gruen PWA – Quellcode & Handy-Anleitung
 
 ## Was ist das?
 Ein installierbarer Web-App-Prototyp (PWA) für Android. Enthält Lobby/Einladung, Rollenwahl, Setzphase, 60-Sekunden-Ablauf mit zufälligem Muster bei unvollständiger Platzierung, Löschwerkzeug und Suchphase.
