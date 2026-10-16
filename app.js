@@ -110,22 +110,61 @@ function beginSetup(){
   phase="setup";board=Array(25).fill("white");revealed=Array(25).fill(false);seconds=60;
   send({type:"start",phase,board,revealed,seconds});renderGame();startClock();
 }
-function startClock(){
-  clearInterval(timerHandle);seconds=60;$("timer").textContent=seconds;
-  timerHandle=setInterval(()=>{
-    seconds--; $("timer").textContent=seconds;
-    if(seconds<=0){
+function startClock() {
+  clearInterval(timerHandle);
+
+  const deadline = Date.now() + 60_000;
+
+  function tick() {
+    seconds = Math.max(
+      0,
+      Math.ceil((deadline - Date.now()) / 1000)
+    );
+
+    $("timer").textContent = seconds;
+
+    if (seconds === 0) {
       clearInterval(timerHandle);
-      const greens=board.filter(x=>x==="green").length, reds=board.filter(x=>x==="red").length;
-      if(greens!==3||reds!==3){
-        // Bei unvollständiger Wahl wird das gesamte Muster neu zufällig gesetzt.
-        board=Array(25).fill("white");
-        const slots=[...Array(25).keys()].sort(()=>Math.random()-.5).slice(0,6);
-        slots.slice(0,3).forEach(i=>board[i]="green");slots.slice(3).forEach(i=>board[i]="red");
-        send({type:"randomized",board});beginSearch();
-      }else beginSearch();
+
+      const greenCount =
+        board.filter(v => v === "green").length;
+
+      const redCount =
+        board.filter(v => v === "red").length;
+
+      if (greenCount !== 3 || redCount !== 3) {
+        board = Array(25).fill("white");
+
+        // Sechs verschiedene zufällige Positionen
+        const positions = Array.from(
+          { length: 25 },
+          (_, i) => i
+        );
+
+        for (let i = positions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [positions[i], positions[j]] =
+            [positions[j], positions[i]];
+        }
+
+        positions.slice(0, 3).forEach(
+          i => board[i] = "green"
+        );
+
+        positions.slice(3, 6).forEach(
+          i => board[i] = "red"
+        );
+
+        send({ type: "randomized", board });
+      }
+
+      beginSearch();
+      return;
     }
-  },1000);
+  }
+
+  tick();
+  timerHandle = setInterval(tick, 250);
 }
 function beginSearch(){
   clearInterval(timerHandle);phase="search";revealed=Array(25).fill(false);
@@ -139,23 +178,61 @@ function renderGame(){
   $("timer").textContent=phase==="setup"?seconds:"—";
   renderBoard();updateCounts();toolUi();
 }
-function renderBoard(){
-  const b=$("board");b.innerHTML="";
-  board.forEach((v,i)=>{
-    const btn=document.createElement("button");btn.className="cell";
-    if(phase==="setup"){
-      btn.classList.add(v==="green"?"green":v==="red"?"red":"");
-      btn.textContent=v==="white"?"":v==="green"?"●":"●";
-      btn.onclick=()=>place(i);
-    }else{
-      if(v==="black")btn.classList.add("black");
-      else if(revealed[i]&&v==="green")btn.classList.add("hitgreen");
-      else if(revealed[i]&&v==="red")btn.classList.add("hitred");
-      btn.textContent=v==="black"?"":revealed[i]?(v==="green"?"✓":"✓"):"?";
-      btn.onclick=()=>searchCell(i);
+function renderBoard() {
+  const boardElement = document.getElementById("board");
+
+  if (!boardElement) {
+    console.error("Spielfeld-Element fehlt!");
+    return;
+  }
+
+  // Raster sichtbar machen und 25 Felder erzeugen
+  boardElement.style.display = "grid";
+  boardElement.style.gridTemplateColumns = "repeat(5, minmax(0, 1fr))";
+  boardElement.style.gap = "6px";
+  boardElement.innerHTML = "";
+
+  for (let i = 0; i < 25; i++) {
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "cell";
+    cell.style.display = "block";
+    cell.style.minWidth = "0";
+    cell.style.width = "100%";
+    cell.style.aspectRatio = "1 / 1";
+
+    const color = board[i];
+
+    if (phase === "setup") {
+      cell.style.backgroundColor =
+        color === "green" ? "#16a34a" :
+        color === "red" ? "#dc2626" : "#f8fafc";
+
+      cell.style.color = color === "white" ? "#111827" : "#ffffff";
+      cell.textContent = color === "white" ? "" : "●";
+
+      cell.onclick = () => place(i);
+    } else {
+      if (color === "black") {
+        cell.style.backgroundColor = "#020617";
+        cell.textContent = "";
+      } else if (revealed[i] && color === "green") {
+        cell.style.backgroundColor = "#16a34a";
+        cell.textContent = "✓";
+      } else if (revealed[i] && color === "red") {
+        cell.style.backgroundColor = "#dc2626";
+        cell.textContent = "✓";
+      } else {
+        cell.style.backgroundColor = "#f8fafc";
+        cell.style.color = "#111827";
+        cell.textContent = "?";
+      }
+
+      cell.onclick = () => searchCell(i);
     }
-    b.appendChild(btn);
-  });
+
+    boardElement.appendChild(cell);
+  }
 }
 function place(i){
   if(role!=="giver"||phase!=="setup")return;
