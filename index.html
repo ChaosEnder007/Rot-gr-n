@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <title>Grün gegen Rot – Das Wunsch-Duell</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header><h1>Grün gegen Rot</h1><p>Das Wunsch-Duell</p></header>
+
+    <section id="home" class="panel">
+      <label>Dein Spielername <input id="playerName" maxlength="24" placeholder="Spielername"></label>
+      <button id="createBtn">Lobby erstellen</button>
+      <label>Beitrittscode oder Lobby-ID <input id="joinCode" autocomplete="off" placeholder="Code aus der Einladung"></label>
+      <button id="joinBtn" class="secondary">Lobby beitreten</button>
+      <p class="hint">Für Online-P2P benötigen beide Geräte Internet. Diese Demo nutzt PeerJS zum Vermitteln der WebRTC-Verbindung.</p>
+    </section>
+
+    <section id="lobby" class="panel hidden">
+      <h2>Lobby</h2>
+      <p>Code: <strong id="roomCode"></strong></p>
+      <button id="copyLinkBtn" class="secondary">Einladungslink kopieren</button>
+      <button id="shareBtn" class="secondary">Einladung teilen</button>
+      <p id="lobbyStatus" class="status">Warte auf Mitspieler …</p>
+      <div class="roleChoices">
+        <button id="giverBtn">Ich bin Spielgeber</button>
+        <button id="seekerBtn" class="secondary">Ich bin Sucher</button>
+      </div>
+      <p id="roleStatus">Wähle deine Rolle. Es darf nur einen Spielgeber und einen Sucher geben.</p>
+      <button id="readyBtn">Bereit</button>
+      <button id="startBtn" disabled>Spiel starten</button>
+      <button id="leaveBtn" class="secondary">Lobby verlassen</button>
+    </section>
+
+    <section id="game" class="panel hidden">
+      <div class="gameTop">
+        <h2 id="phaseTitle">Felder platzieren</h2>
+        <span id="timer" class="timer">60</span>
+      </div>
+      <p id="gameStatus" class="status"></p>
+      <div id="tools" class="tools">
+        <button id="greenTool">🟢 Grün <span id="greenCount">0/3</span></button>
+        <button id="redTool" class="secondary">🔴 Rot <span id="redCount">0/3</span></button>
+        <button id="eraseTool" class="secondary" aria-label="Löschen">🗑 Löschen</button>
+      </div>
+      <div id="board" class="board" aria-label="5 mal 5 Spielfeld"></div>
+      <button id="finishSetup">Fertig – Suchphase starten</button>
+      <button id="backLobby" class="secondary">Zur Lobby</button>
+      <p class="hint">Prototyp: Die Platzierung wird auf dem Gerät des Spielgebers verwaltet. Vermeide, dass der Sucher während der Setzphase den Bildschirm des Spielgebers sieht.</p>
+    </section>
+    <footer><small>Prototyp · noch kein offizielles veröffentlichtes Spiel</small></footer>
+  </main>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
